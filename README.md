@@ -1,5 +1,5 @@
 # nginx-reverse-proxy-in-k8s-in-docker [![Build Status](https://travis-ci.org/daggerok/nginx-reverse-proxy-in-k8s-in-docker.svg?branch=master)](https://travis-ci.org/daggerok/nginx-reverse-proxy-in-k8s-in-docker)
-Example of nginx reverse proxy in k8s in Docker for Mac (Windows)
+Example of nginx reverse proxy in k8s in Docker for Mac / Windows or by using kind (Kubernetes in Docker) tool on Linux
 
 ## Table of content
 
@@ -11,6 +11,8 @@ Example of nginx reverse proxy in k8s in Docker for Mac (Windows)
   - [Build docker image](#build-docker-image)
   - [Run in docker](#run-in-docker)
 * [k8s](#k8s)
+  - [create k8s deployment](#create-k8s-deployment)
+  - [delete k8s deployment](#delete-k8s-deployment)
 
 ## Local development
 
@@ -47,9 +49,21 @@ docker build -t daggerok/webapp -f docker/Dockerfile webapp
 docker run -i --rm --name native-app -p 8080:8080 daggerok/webapp
 ```
 
-### k8s
+## k8s
 
-TODO: implement me please...
+after docker image was built
+
+### create k8s deployment
+
+```shell script
+kubectl apply -f k8s/
+```
+
+### delete k8s deployment
+
+```shell script
+kubectl delete -f k8s/
+```
 
 ## Resources
 
