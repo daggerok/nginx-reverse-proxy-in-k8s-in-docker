@@ -4,6 +4,7 @@ notifications:
 language: java
 rvm: 2.6.4
 python: 3
+go: 1.x
 
 service:
 - docker
@@ -65,7 +66,7 @@ jobs:
 
   - stage: test
     jdk: openjdk11
-    name: tests jdk11
+    name: docker tests jdk11
     script:
     - function wait_healthy_docker_containers {
         n=${1:-1} ;
@@ -79,12 +80,50 @@ jobs:
     - docker build -t daggerok/webapp -f docker/Dockerfile webapp
     - stop_any 80 8080
     - docker run -i --rm --name run-webapp -p 8080:8080 daggerok/webapp &
+    - sleep 1s
     - docker logs -f -t run-webapp &
     - wait_healthy_docker_containers 1
     - http get :8080
     - http post :8080/maksimko
     - docker rm -f -v run-webapp
     - stop_any 80 8080
+
+  - stage: test
+    go: 1.x
+    jdk: openjdk11
+    name: kind tests jdk8
+    script:
+#    - function wait_healthy_docker_containers {
+#        n=${1:-1} ;
+#        while [[ $(docker ps -n ${n} -q -f health=healthy -f status=running | wc -l) -lt ${n} ]] ; do
+#          sleep 1s ;
+#          echo -ne '.' ;
+#        done ;
+#        echo '' ;
+#      }
+    - mkdir -p "$HOME/.local/bin"
+    - export PATH="$HOME/.local/bin:$PATH"
+    - curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
+    - chmod +x kubectl
+    - mv -f kubectl $HOME/.local/bin/
+    - curl -Lo kind https://github.com/kubernetes-sigs/kind/releases/download/0.1.0/kind-linux-amd64
+    - chmod +x kind
+    - mv -v kind $HOME/.local/bin/
+    - kind create cluster --image "kindest/node:v1.13.3"
+    - export KUBECONFIG=$(kind get kubeconfig-path)
+    - KUBECONFIG=$(kind get kubeconfig-path) kubectl get nodes
+    - kubectl --kubeconfig=$(kind get kubeconfig-path) get nodes
+    - kind delete cluster
+#    - ./mvnw >/dev/null
+#    - docker build -t daggerok/webapp -f docker/Dockerfile webapp
+#    - stop_any 80 8080
+#    - docker run -i --rm --name run-webapp -p 8080:8080 daggerok/webapp &
+#    - docker logs -f -t run-webapp &
+#    - wait_healthy_docker_containers 1
+#    - http get :8080
+#    - http post :8080/maksimko
+#    - docker rm -f -v run-webapp
+#    - stop_any 80 8080
 
 #  - stage: deploy
 #    jdk: openjdk8
