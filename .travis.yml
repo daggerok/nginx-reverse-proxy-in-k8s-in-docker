@@ -45,7 +45,7 @@ jobs:
     jdk: openjdk8
     name: tests jdk8
     script:
-    - cd $TRAVIS_BUILD_DIR && ./mvmw
+    - ./mvnw
     - java -jar webapp/target/*.jar &
     - wait_for 8080
     - http get :8080
@@ -56,7 +56,7 @@ jobs:
     jdk: openjdk11
     name: tests jdk11
     script:
-    - cd $TRAVIS_BUILD_DIR && ./mvmw
+    - ./mvnw
     - java -jar webapp/target/*.jar &
     - wait_for 8080
     - http get :8080
@@ -67,20 +67,30 @@ jobs:
     jdk: openjdk11
     name: tests jdk11
     script:
-    - cd $TRAVIS_BUILD_DIR && ./mvmw
+    - function wait_healthy_docker_containers {
+        n=${1:-1} ;
+        while [[ $(docker ps -n ${n} -q -f health=healthy -f status=running | wc -l) -lt ${n} ]] ; do
+          sleep 1s ;
+          echo -ne '.' ;
+        done ;
+        echo '' ;
+      }
+    - ./mvnw
     - docker build -t daggerok/webapp -f docker/Dockerfile webapp
+    - stop_any 80 8080
     - docker run -i --rm --name run-webapp -p 8080:8080 daggerok/webapp &
     - docker logs -f -t run-webapp &
-    - wait_for 8080
+    - wait_healthy_docker_containers 1
     - http get :8080
     - http post :8080/maksimko
     - docker rm -f -v run-webapp
+    - stop_any 80 8080
 
 #  - stage: deploy
 #    jdk: openjdk8
 #    rvm: 2.6.4
 #    name: Gradle Reckon Tag Github and Jekyll GitHub Pages
-#    script: ./gradlew --stop
+#    script: ./mvnw
 #    env:
 #      - secure: "rMVeoE0TGkC2ld/vt7yMtNmkb5ZuKCq4EWTlFDgKBZqRCaIZVZ+zJv1yHXf2mGEBt7j4tVn+fwlUm+8clA2vXUx4eRL+SBEz+MSS8fZRSgRLoGwvdhsH2Sbgx4logXBGd04rStRQgrh0Px/7SaLmtXGoSlmy8LQObZlfDg0hHKxa9dlPjhcjHYo3D4QmE00w9IAUp1cU2AtlUtxd+CsxBmBYHhRTRfQU1IZTseFGPflNjTRqpM5RM/IWe6ecdwKCdVZpqHH1VOmHtsbxxYBSYxt5QQtP5Pg2brUcJha5TCSs81dZ+SnleoEt1iIvW535UVCdLUKxPw56F2Q2ZEyjYWJcX5JRgfZ0Bxwwsg1Pj746utvzsgMntRNm0taWpQsGOSL7tAGQZgtB8TIP55I1QR/YmR0V7t1aYJ/4ooVgnaB5jyqmLQSCRbdbD9prZ+a4dmjTHyBBg4B7gAB/IP6IOyLFm6MOLmTJnVS7nofDTHTvpQ0+GoZuQqZLGc1AUPwbNTZIOO3PNKSUhoLtD00k9dBytWtTA0nzbbfKTa4auvavDkpQNEcoxZGRxnQsdZN4Rw6j/PAEd4Y67iMq8TPm2MCNXPpcOWNxO2ceh3JYl3tfiXqlIgAt9glLGd54RB60OBQa40Sy9oQFlSQIgLsRUjVI/tY/LUN8wHFgH34BvEM="
 #    before_deploy:
@@ -111,4 +121,5 @@ cache:
   pip: true
   packages: true
   directories:
+  - ~/.docker
   - ~/.m2
