@@ -11,8 +11,9 @@ Example of nginx reverse proxy in k8s in Docker for Mac / Windows or by using ki
   - [Build docker image](#build-docker-image)
   - [Run in docker](#run-in-docker)
 * [k8s](#k8s)
-  - [create k8s deployment](#create-k8s-deployment)
-  - [delete k8s deployment](#delete-k8s-deployment)
+  - [Create k8s deployment](#create-k8s-deployment)
+  - [Delete k8s deployment](#delete-k8s-deployment)
+* TODO...
 
 ## Local development
 
@@ -53,17 +54,19 @@ docker run -i --rm --name native-app -p 8080:8080 daggerok/webapp
 
 after docker image was built
 
-### create k8s deployment
+### Create k8s deployment
 
 ```shell script
 kubectl apply -f k8s/
 ```
 
-### delete k8s deployment
+### Delete k8s deployment
 
 ```shell script
 kubectl delete -f k8s/
 ```
+
+## TODO...
 
 ## Resources
 
