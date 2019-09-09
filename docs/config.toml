@@ -1,0 +1,5 @@
+# baseURL = "./nginx-reverse-proxy-in-k8s-in-docker"
+baseURL = "http://daggerok.github.io/nginx-reverse-proxy-in-k8s-in-docker/"
+languageCode = "en-us"
+title = "java app with nginx reverse-proxy in kind (k8s in docker)"
+theme = "ananke"
